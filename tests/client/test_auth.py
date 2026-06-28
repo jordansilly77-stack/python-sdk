@@ -1998,6 +1998,11 @@ class TestWWWAuthenticate:
                 "admin:write resource:read",
             ),
             (
+                'Bearer error_scope="decoy", scope="read write"',
+                "scope",
+                "read write",
+            ),
+            (
                 'Bearer realm="api", resource_metadata="https://api.example.com/.well-known/oauth-protected-resource", '
                 'error="insufficient_scope"',
                 "resource_metadata",
@@ -2005,6 +2010,7 @@ class TestWWWAuthenticate:
             ),
             # Multiple parameters with unquoted value
             ('Bearer realm="api", scope=basic', "scope", "basic"),
+            ("Bearer error_scope=decoy, scope=read", "scope", "read"),
             # Values with special characters
             (
                 'Bearer scope="resource:read resource:write user_profile"',
@@ -2050,6 +2056,12 @@ class TestWWWAuthenticate:
             # Malformed field (empty value)
             ("Bearer scope=", "scope", "malformed scope parameter"),
             ("Bearer resource_metadata=", "resource_metadata", "malformed resource_metadata parameter"),
+            ('Bearer custom_scope="read"', "scope", "scope only appears as part of another parameter name"),
+            (
+                'Bearer x_resource_metadata="https://decoy.example.com"',
+                "resource_metadata",
+                "resource_metadata only appears as part of another parameter name",
+            ),
         ],
     )
     def test_extract_field_from_www_auth_invalid_cases(
